@@ -40,6 +40,7 @@ jobs:
           KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
         run: |
           echo "$KUBE_CONFIG" | base64 -d > kubeconfig
+          chmod 600 kubeconfig
           export KUBECONFIG=kubeconfig
           helm upgrade --install cloudcraft-${{ matrix.env }} ./helm \
             --values ./helm/values-${{ matrix.env }}.yaml \
