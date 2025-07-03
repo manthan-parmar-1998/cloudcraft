@@ -1,0 +1,5 @@
+apiVersion: v2
+name: cloudcraft
+description: A Helm chart for deploying CloudCraft application
+version: 0.2.0
+appVersion: "1.0"

@@ -1,0 +1,46 @@
+{{- if .Values.monitoring.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: {{ .Release.Name }}-grafana
+    namespace: {{ .Release.Namespace }}
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: {{ .Release.Name }}-grafana
+    template:
+        metadata:
+            labels:
+                app: {{ .Release.Name }}-grafana
+    spec:
+        containers:
+        - name: grafana
+            image: grafana/grafana:9.5.1
+            env:
+            - name: GF_SECURITY_ADMIN_PASSWORD
+            value: {{ .Values.monitoring.grafana.adminPassword }}
+            ports:
+            - containerPort: 3000
+            resources:
+                requests:
+                    cpu: "100m"
+                    memory: "128Mi"
+                limits:
+                    cpu: "200m"
+                    memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: {{ .Release.Name }}-grafana
+    namespace: {{ .Release.Namespace }}
+spec:
+    selector:
+        app: {{ .Release.Name }}-grafana
+    ports:
+        - protocol: TCP
+        port: 80
+        targetPort: 3000
+    type: LoadBalancer
+{{- end }}

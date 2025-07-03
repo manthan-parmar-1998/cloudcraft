@@ -1,0 +1,33 @@
+{{- if .Values.monitoring.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+    name: {{ .Release.Name }}-prometheus
+    namespace: {{ .Release.Namespace }}
+spec:
+    serviceMonitorSelector:
+        matchLabels:
+        app: {{ .Release.Name }}-cloudcraft
+    scrapeInterval: {{ .Values.monitoring.prometheus.scrapeInterval }}
+    resources:
+        requests:
+        cpu: "100m"
+        memory: "256Mi"
+        limits:
+        cpu: "200m"
+        memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: {{ .Release.Name }}-prometheus
+    namespace: {{ .Release.Namespace }}
+spec:
+    selector:
+        app.kubernetes.io/name: prometheus
+    ports:
+        - protocol: TCP
+        port: 9090
+        targetPort: 9090
+    type: ClusterIP
+{{- end }}

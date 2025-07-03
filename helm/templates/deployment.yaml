@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: {{ .Release.Name }}-cloudcraft
+    namespace: {{ .Release.Namespace }}
+spec:
+    replicas: {{ .Values.replicaCount }}
+    selector:
+        matchLabels:
+            app: {{ .Release.Name }}-cloudcraft
+    template:
+        metadata:
+            labels:
+                app: {{ .Release.Name }}-cloudcraft
+        annotations:
+            prometheus.io/scrape: "trur"
+            prometheus.io/port: "5000"
+        spec:
+            containers:
+            - name: cloudcraft
+                image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+                imagePullPolicy: {{ .Values.image.pullPolicy }}
+                ports:
+                - containerPort: 5000
+                resources:
+                    {{- toYaml .Values.resources | nindent 12 }}
+

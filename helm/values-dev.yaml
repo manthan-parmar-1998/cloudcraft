@@ -1,0 +1,21 @@
+replicaCount: 1
+image:
+  repository: manthanp1313/cloudcraft
+  tag: latest
+  pullPolicy: Always
+service:
+  type: ClusterIP
+  port: 80
+resources:
+  limits:
+    cpu: "200m"
+    memory: "256Mi"
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+monitoring:
+  enabled: true
+  prometheus:
+    scrapeInterval: 15s
+  grafana:
+    adminPassword: dev-secret

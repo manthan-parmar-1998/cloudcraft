@@ -1,0 +1,21 @@
+replicaCount: 2
+image:
+  repository: manthanp1313/cloudcraft
+  tag: latest
+  pullPolicy: Always
+service:
+  type: LoadBalancer
+  port: 80
+resources:
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+monitoring:
+  enabled: true
+  prometheus:
+    scrapeInterval: 10s
+  grafana:
+    adminPassword: staging-secret
