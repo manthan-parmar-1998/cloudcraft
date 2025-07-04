@@ -1,33 +1,66 @@
 {{- if .Values.monitoring.enabled }}
-apiVersion: monitoring.coreos.com/v1
-kind: Prometheus
+apiVersion: v1
+kind: ConfigMap
 metadata:
-    name: {{ .Release.Name }}-prometheus
-    namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-prometheus-config
+  namespace: {{ .Release.Namespace }}
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: {{ .Values.monitoring.prometheus.scrapeInterval }}
+    scrape_configs:
+    - job_name: 'cloudcraft'
+      static_configs:
+      - targets: ['{{ .Release.Name }}-cloudcraft:80']
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-prometheus
+  namespace: {{ .Release.Namespace }}
 spec:
-    serviceMonitorSelector:
-        matchLabels:
-        app: {{ .Release.Name }}-cloudcraft
-    scrapeInterval: {{ .Values.monitoring.prometheus.scrapeInterval }}
-    resources:
-        requests:
-        cpu: "100m"
-        memory: "256Mi"
-        limits:
-        cpu: "200m"
-        memory: "512Mi"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-prometheus
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-prometheus
+    spec:
+      containers:
+      - name: prometheus
+        image: prom/prometheus:latest
+        args:
+        - '--config.file=/etc/prometheus/prometheus.yml'
+        ports:
+        - containerPort: 9090
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/prometheus
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "200m"
+            memory: "512Mi"
+      volumes:
+      - name: config-volume
+        configMap:
+          name: {{ .Release.Name }}-prometheus-config
 ---
 apiVersion: v1
 kind: Service
 metadata:
-    name: {{ .Release.Name }}-prometheus
-    namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-prometheus
+  namespace: {{ .Release.Namespace }}
 spec:
-    selector:
-        app.kubernetes.io/name: prometheus
-    ports:
-        - protocol: TCP
-        port: 9090
-        targetPort: 9090
-    type: ClusterIP
+  selector:
+    app: {{ .Release.Name }}-prometheus
+  ports:
+  - protocol: TCP
+    port: 9090
+    targetPort: 9090
+  type: ClusterIP
 {{- end }}

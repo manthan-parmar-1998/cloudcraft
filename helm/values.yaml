@@ -1,0 +1,27 @@
+# Default values for cloudcraft
+replicaCount: 1
+
+image:
+  repository: nginx
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 5000
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+monitoring:
+  enabled: false
+  prometheus:
+    scrapeInterval: 30s
+  grafana:
+    adminPassword: changeme
